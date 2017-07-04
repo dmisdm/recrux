@@ -8,6 +8,10 @@ export interface ReAction<T = string, P = {}> extends Action {
 export interface ReReducer<State, Action extends ReAction = ReAction> {
   (state: State, action: Action): State;
 }
+/**
+ * Create one reducer that is a composition of many. Behaves like a waterfall starting from the first argument
+ * @param reducers 
+ */
 export function composeReducer<State>(
   ...reducers: ReReducer<State>[]
 ): ReReducer<State> {

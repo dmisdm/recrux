@@ -11,7 +11,8 @@
     "typescript": "^2.4.1"
   },
   "devDependencies": {
-    "react-scripts-ts": "^2.3.2"
+    "react-scripts-ts": "^2.3.2",
+    "redux": "^3.7.1"
   },
   "peerDependencies": {
     "redux": "3.x"
@@ -26,12 +27,11 @@
     "composition",
     "fp"
   ],
-  "files": [
-    "build/dist"
-  ],
+  "files": ["build/dist"],
   "scripts": {
     "build": "tsc",
-    "test": "react-scripts-ts test --env=jsdom"
+    "test": "react-scripts-ts test --env=jsdom",
+    "clean": "rm -rf build"
   },
   "main": "build/dist/index.js",
   "typings": "./build/dist/index.d.ts",
