@@ -1,0 +1,46 @@
+{
+  "name": "recrux",
+  "version": "0.1.0",
+  "private": false,
+  "dependencies": {
+    "@types/jest": "^20.0.2",
+    "@types/node": "^8.0.7",
+    "@types/ramda": "^0.24.1",
+    "fp-ts": "^0.3.5",
+    "ramda": "^0.24.1",
+    "typescript": "^2.4.1"
+  },
+  "devDependencies": {
+    "react-scripts-ts": "^2.3.2"
+  },
+  "peerDependencies": {
+    "redux": "3.x"
+  },
+  "keywords": [
+    "react",
+    "redux",
+    "functional",
+    "programming",
+    "compose",
+    "recompose",
+    "composition",
+    "fp"
+  ],
+  "files": ["build/dist"],
+  "scripts": {
+    "build": "tsc",
+    "test": "react-scripts-ts test --env=jsdom"
+  },
+  "main": "build/dist/index.js",
+  "typings": "./build/dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dmisdm/recrux.git"
+  },
+  "author": {
+    "email": "danielmanning213@gmail.com",
+    "name": "Daniel Manning"
+  },
+  "license": "MIT",
+  "npmName": "recrux"
+}
