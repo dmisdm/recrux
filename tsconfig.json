@@ -16,7 +16,8 @@
     "suppressImplicitAnyIndexErrors": true,
     "noUnusedLocals": true,
     "strict": true,
-    "declaration": true
+    "declaration": true,
+    "plugins": [{ "name": "tslint-language-service" }]
   },
   "exclude": [
     "node_modules",

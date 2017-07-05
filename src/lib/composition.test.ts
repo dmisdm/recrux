@@ -1,9 +1,9 @@
 import { createStore } from "redux";
 import {
   composeReducer,
-  ReReducer,
+  initialStateReducer,
   ReAction,
-  initialStateReducer
+  ReReducer
 } from "./composition";
 
 interface State {
@@ -12,13 +12,13 @@ interface State {
 }
 
 const initialState = {
-  test: "wadup",
-  hey: "man"
+  hey: "man",
+  test: "wadup"
 };
 
 describe("Redux composition helpers", () => {
   it("Should be able to compose reducers", () => {
-    const reducers: ReReducer<State>[] = [(s = initialState, a) => s];
+    const reducers: Array<ReReducer<State>> = [(s = initialState, a) => s];
 
     const mainReducer = (state: State, action: ReAction) =>
       composeReducer(...reducers)(state, action);
@@ -33,7 +33,7 @@ describe("Redux composition helpers", () => {
 
     reducers.push(
       (state, action) =>
-        action.type == "whatever"
+        action.type === "whatever"
           ? {
               ...state,
               hey: "whatever"
