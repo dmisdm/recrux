@@ -21,5 +21,5 @@ export function composeReducer<State>(
 }
 
 export const initialStateReducer = <State>(initialState: State) => {
-  return (state = initialState) => state;
+  return (_state = initialState) => _state;
 };

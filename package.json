@@ -52,6 +52,6 @@
   "license": "MIT",
   "npmName": "recrux",
   "lint-staged": {
-    "*.{ts,tsx}": ["prettier --write", "tslint --fix -p .", "git add"]
+    "*.{ts,tsx}": ["prettier --write", "tslint --fix", "git add"]
   }
 }
