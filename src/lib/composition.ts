@@ -1,13 +1,13 @@
 import { Action } from "redux";
 
-export interface ReAction<T = string, P = {}> extends Action {
-  type: T;
+export interface IReAction<P = {}> extends Action {
   payload?: P;
+  type: string;
 }
 
-export type ReReducer<State, Action extends ReAction = ReAction> = (
+export type ReReducer<State, IAction extends IReAction = IReAction> = (
   state: State,
-  action: Action
+  action: IAction
 ) => State;
 /**
  * Create one reducer that is a composition of many. Behaves like a waterfall starting from the first argument
@@ -23,3 +23,12 @@ export function composeReducer<State>(
 export const initialStateReducer = <State>(initialState: State) => {
   return (_state = initialState) => _state;
 };
+
+export interface IActionMap<State> {
+  [key: string]: ReReducer<State>;
+}
+export const fromMap = <State>(map: IActionMap<State>) =>
+  ((state, action) =>
+    map[action.type] ? map[action.type](state, action) : state) as ReReducer<
+    State
+  >;

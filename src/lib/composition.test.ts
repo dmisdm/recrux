@@ -1,26 +1,21 @@
 import { createStore } from "redux";
 import {
   composeReducer,
+  fromMap,
+  IActionMap,
   initialStateReducer,
-  ReAction,
+  IReAction,
   ReReducer
 } from "./composition";
-
-interface State {
-  test: string;
-  hey: string;
-}
-
-const initialState = {
-  hey: "man",
-  test: "wadup"
-};
+import { initialTestState, ITestState } from "./TestModels";
 
 describe("Redux composition helpers", () => {
   it("Should be able to compose reducers", () => {
-    const reducers: Array<ReReducer<State>> = [(s = initialState, a) => s];
+    const reducers: Array<ReReducer<ITestState>> = [
+      (s = initialTestState, a) => s
+    ];
 
-    const mainReducer = (state: State, action: ReAction) =>
+    const mainReducer = (state: ITestState, action: IReAction) =>
       composeReducer(...reducers)(state, action);
 
     const store = createStore(mainReducer);
@@ -29,7 +24,7 @@ describe("Redux composition helpers", () => {
       type: "whatever"
     });
 
-    expect(store.getState()).toBe(initialState);
+    expect(store.getState()).toBe(initialTestState);
 
     reducers.push(
       (state, action) =>
@@ -59,5 +54,15 @@ describe("Redux composition helpers", () => {
     const currentState = store.getState();
 
     expect(currentState && currentState.yay).toBe("yayee");
+  });
+
+  it("fromMap should work", () => {
+    const actionMap: IActionMap<ITestState> = {
+      "test/test": (state, action) => ({ ...state, test: "yeah" })
+    };
+    const reducer = fromMap(actionMap);
+    expect(reducer(initialTestState, { type: "test/test" })).toMatchObject({
+      test: "yeah"
+    });
   });
 });

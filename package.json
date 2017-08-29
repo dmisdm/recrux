@@ -34,7 +34,7 @@
   ],
   "files": ["build/dist"],
   "scripts": {
-    "build": "tsc",
+    "build": "tslint -p . && tsc",
     "test": "react-scripts-ts test --env=jsdom",
     "clean": "rm -rf build",
     "precommit": "lint-staged && npm run build"
