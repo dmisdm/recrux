@@ -9,17 +9,17 @@
     address "^1.0.1"
     debug "^2.6.0"
 
-"@types/jest@^20.0.2":
-  version "20.0.2"
-  resolved "https://registry.yarnpkg.com/@types/jest/-/jest-20.0.2.tgz#86c751121fb53dbd39bb1a08c45083da13f2dc67"
+"@types/jest@^20.0.8":
+  version "20.0.8"
+  resolved "https://registry.yarnpkg.com/@types/jest/-/jest-20.0.8.tgz#7f8c97f73d20d3bf5448fbe33661a342002b5954"
 
-"@types/node@^8.0.7":
-  version "8.0.7"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-8.0.7.tgz#fb0ad04b5b6f6eabe0372a32a8f1fbba5c130cae"
+"@types/node@^8.0.26":
+  version "8.0.26"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-8.0.26.tgz#4d58be925306fd22b1141085535a0268b8beb189"
 
-"@types/ramda@^0.24.1":
-  version "0.24.1"
-  resolved "https://registry.yarnpkg.com/@types/ramda/-/ramda-0.24.1.tgz#473695821e3c013b1894fc2f8b06614ee62005a9"
+"@types/ramda@^0.24.9":
+  version "0.24.9"
+  resolved "https://registry.yarnpkg.com/@types/ramda/-/ramda-0.24.9.tgz#5e08e512f38614f2bf09fde6f0bfcc3b2352325b"
 
 abab@^1.0.3:
   version "1.0.3"
