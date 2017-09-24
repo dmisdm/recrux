@@ -1,16 +1,17 @@
 import { createStore } from "redux";
-import { makeAction } from "./actions";
-import { composeReducer } from "./composition";
+
+import { createAsyncFactory, createFactory } from "./actions";
+import { Action, composeReducer } from "./composition";
 import { initialTestState, ITestState } from "./TestModels";
 
 describe("Action creators", () => {
-  it("makeAction returns what it should return", () => {
+  it("createFactory works", () => {
     const reduce = (state: ITestState) => ({ ...state, hey: "whatsup brah" });
 
-    const testAction = makeAction<ITestState>({
+    const testAction = createFactory<ITestState>({
       actionName: "testAction",
       namespace: "testNS",
-      reduce
+      reducer: reduce
     });
 
     const reducer = composeReducer(
@@ -18,8 +19,12 @@ describe("Action creators", () => {
       testAction.reducer
     );
 
+    const action = testAction();
+
+    expect(action).toHaveProperty("type");
+
     const store = createStore(reducer);
-    store.dispatch(testAction());
+    store.dispatch(action);
 
     expect(testAction.type).toBe(`testNS/testAction`);
     expect(testAction.actionName).toBe("testAction");
@@ -29,6 +34,72 @@ describe("Action creators", () => {
     );
     expect(store.getState()).toMatchObject({
       hey: "whatsup brah"
+    });
+  });
+
+  it("createAsyncFactory works", () => {
+    const requestReducer = (state: ITestState, action?: Action<{}>) => ({
+      ...state,
+      hey: "whatsup brah"
+    });
+    const errorMessage = "Could not authenticate";
+    const fulfillReducer = (
+      state: ITestState,
+      action?: Action<{ user: string }>
+    ) => ({ ...state, data: action ? action.payload : null });
+    const errorReducer = (state: ITestState, action?: Action<string>) => ({
+      ...state,
+      error: action ? action.payload : null
+    });
+    const actionName = "testAction";
+    const namespace = "ns";
+    const testAction = createAsyncFactory({
+      actionName,
+      errorReducer,
+      fulfillReducer,
+      namespace,
+      requestReducer
+    });
+    const store = createStore(testAction.reducer);
+    const request = testAction.request();
+    const fulfill = testAction.fulfill();
+    const error = testAction.error(errorMessage);
+
+    expect(request).toHaveProperty("type");
+    expect(fulfill).toHaveProperty("type");
+    expect(error).toHaveProperty("type");
+
+    expect(testAction.type).toBe(`${namespace}/${actionName}`);
+    expect(testAction.actionName).toBe(actionName);
+    expect(testAction.namespace).toBe(namespace);
+    expect(testAction.reducer(initialTestState, request)).toMatchObject(
+      testAction.requestReducer(initialTestState, request)
+    );
+
+    expect(testAction.reducer(initialTestState, fulfill)).toMatchObject(
+      testAction.fulfillReducer(initialTestState, fulfill)
+    );
+
+    expect(testAction.reducer(initialTestState, error)).toMatchObject(
+      testAction.errorReducer(initialTestState, error)
+    );
+
+    store.dispatch(request);
+    expect(store.getState()).toMatchObject({
+      hey: "whatsup brah"
+    });
+
+    store.dispatch(error);
+    expect(store.getState()).toMatchObject({
+      hey: "whatsup brah",
+      error: errorMessage
+    });
+
+    store.dispatch(fulfill);
+    expect(store.getState()).toMatchObject({
+      hey: "whatsup brah",
+      error: errorMessage,
+      data: undefined
     });
   });
 });

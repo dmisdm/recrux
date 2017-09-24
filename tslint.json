@@ -1,5 +1,5 @@
 {
-  "extends": ["tslint-react", "tslint:latest", "tslint-config-prettier"],
+  "extends": ["tslint-react", "tslint-config-prettier"],
   "rules": {
     "align": [true, "parameters", "arguments", "statements"],
     "ban": false,
@@ -9,7 +9,6 @@
     "eofline": false,
     "forin": true,
     "indent": [true, "spaces"],
-    "interface-name": [true, "always-prefix"],
     "jsdoc-format": true,
     "jsx-no-lambda": false,
     "jsx-no-multiline-js": false,
@@ -53,7 +52,6 @@
       "check-open-brace",
       "check-whitespace"
     ],
-    "quotemark": [true, "double", "jsx-double"],
     "radix": true,
     "semicolon": [false],
     "switch-default": true,

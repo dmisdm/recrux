@@ -1,21 +1,22 @@
 import { createStore } from "redux";
+
 import {
+  Action,
   composeReducer,
   fromMap,
   IActionMap,
   initialStateReducer,
-  IReAction,
-  ReReducer
+  Reducer
 } from "./composition";
 import { initialTestState, ITestState } from "./TestModels";
 
 describe("Redux composition helpers", () => {
   it("Should be able to compose reducers", () => {
-    const reducers: Array<ReReducer<ITestState>> = [
+    const reducers: Array<Reducer<ITestState>> = [
       (s = initialTestState, a) => s
     ];
 
-    const mainReducer = (state: ITestState, action: IReAction) =>
+    const mainReducer = (state: ITestState, action: Action) =>
       composeReducer(...reducers)(state, action);
 
     const store = createStore(mainReducer);
