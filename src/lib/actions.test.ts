@@ -9,7 +9,7 @@ describe("Action creators", () => {
     const reduce = (state: ITestState) => ({ ...state, hey: "whatsup brah" });
 
     const testAction = createFactory<ITestState>({
-      actionName: "testAction",
+      name: "testAction",
       namespace: "testNS",
       reducer: reduce
     });
@@ -27,7 +27,7 @@ describe("Action creators", () => {
     store.dispatch(action);
 
     expect(testAction.type).toBe(`testNS/testAction`);
-    expect(testAction.actionName).toBe("testAction");
+    expect(testAction.name).toBe("testAction");
     expect(testAction.namespace).toBe("testNS");
     expect(testAction.reducer(initialTestState, testAction())).toMatchObject(
       reduce(initialTestState)
@@ -54,7 +54,7 @@ describe("Action creators", () => {
     const actionName = "testAction";
     const namespace = "ns";
     const testAction = createAsyncFactory({
-      actionName,
+      name,
       errorReducer,
       fulfillReducer,
       namespace,
@@ -70,7 +70,7 @@ describe("Action creators", () => {
     expect(error).toHaveProperty("type");
 
     expect(testAction.type).toBe(`${namespace}/${actionName}`);
-    expect(testAction.actionName).toBe(actionName);
+    expect(testAction.name).toBe(actionName);
     expect(testAction.namespace).toBe(namespace);
     expect(testAction.reducer(initialTestState, request)).toMatchObject(
       testAction.requestReducer(initialTestState, request)
@@ -102,4 +102,21 @@ describe("Action creators", () => {
       data: undefined
     });
   });
+  /*   it("should be able to compose actions", () => {
+    const authenticate = createAsyncFactory({
+      errorReducer: (state, { payload }) => ({
+        ...state,
+        loading: false,
+        error: payload
+      }),
+      fulfillReducer: (state, { payload }) => ({
+        ...state,
+        loading: false,
+        data: payload
+      }),
+      name: "authenticate",
+      namespace: "user",
+      requestReducer: (state, { payload }) => ({ ...state, loading: true })
+    });
+  }); */
 });

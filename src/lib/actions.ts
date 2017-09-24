@@ -1,8 +1,13 @@
 import { Action, composeReducer, Reducer } from "./composition";
 
+/* const actionRegistry = {};
+const doesActionExist = (actionName: string) => !!actionRegistry[actionName];
+const registerAction = (actionName: string) =>
+  (actionRegistry[actionName] = true); */
+
 export interface IExtra<State, PayloadType> {
   reducer: (state: State, action: Action<PayloadType>) => State;
-  actionName: string;
+  name: string;
   namespace: string;
   type: string;
 }
@@ -16,7 +21,7 @@ export interface IExtraAsync<S, R, F, E> {
   fulfill: (payload?: F) => Action<F>;
   errorReducer: Reducer<S, Action<E>>;
   error: (payload?: E) => Action<E>;
-  actionName: string;
+  name: string;
   namespace: string;
   type: string;
   fulfillType: string;
@@ -27,14 +32,14 @@ const assign = Object.assign;
 
 export const createFactory = <State, PayloadType = {}>({
   namespace,
-  actionName,
+  name,
   reducer
 }: {
   namespace: string;
-  actionName: string;
+  name: string;
   reducer: (state: State, action: Action<PayloadType>) => State;
 }) => {
-  const actionType = `${namespace}/${actionName}`;
+  const actionType = `${namespace}/${name}`;
 
   type IOutput = ((payload?: PayloadType) => Action<PayloadType>) &
     IExtra<State, PayloadType>;
@@ -43,11 +48,11 @@ export const createFactory = <State, PayloadType = {}>({
     payload?: PayloadType
   ) => Action<PayloadType>) = payload => ({
     payload,
-    type: `${namespace}/${actionName}`
+    type: `${namespace}/${name}`
   });
 
   const extra: IExtra<State, PayloadType> = {
-    actionName,
+    name,
     namespace,
     reducer: (state, action) => {
       if (action.type === actionType) {
@@ -66,18 +71,18 @@ export const createFactory = <State, PayloadType = {}>({
 
 export const createAsyncFactory = <S, R, F, E>({
   namespace,
-  actionName,
+  name,
   requestReducer,
   fulfillReducer,
   errorReducer
 }: {
   namespace: string;
-  actionName: string;
+  name: string;
   requestReducer: Reducer<S, Action<R>>;
   fulfillReducer: Reducer<S, Action<F>>;
   errorReducer: Reducer<S, Action<E>>;
 }) => {
-  const actionType = `${namespace}/${actionName}`;
+  const actionType = `${namespace}/${name}`;
   const actionTypes = {
     error: `${actionType}_ERROR`,
     fulfill: `${actionType}_FULFILL`,
@@ -132,7 +137,7 @@ export const createAsyncFactory = <S, R, F, E>({
   };
 
   const extra: Extra = {
-    actionName,
+    name,
     error: errorCreator,
     errorReducer: _errorReducer,
     errorType: actionTypes.error,
