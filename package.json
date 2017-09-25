@@ -1,6 +1,6 @@
 {
   "name": "recrux",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "private": false,
   "dependencies": {},
   "devDependencies": {
@@ -29,7 +29,9 @@
     "composition",
     "fp"
   ],
-  "files": ["build/dist"],
+  "files": [
+    "build/dist"
+  ],
   "scripts": {
     "build": "tslint -p . && tsc",
     "test": "react-scripts-ts test --env=jsdom",
@@ -49,6 +51,9 @@
   "license": "MIT",
   "npmName": "recrux",
   "lint-staged": {
-    "*.{ts,tsx}": ["prettier --write", "git add"]
+    "*.{ts,tsx}": [
+      "prettier --write",
+      "git add"
+    ]
   }
 }
