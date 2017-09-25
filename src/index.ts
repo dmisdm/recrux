@@ -1,7 +1,8 @@
 export {
   composeReducer,
   initialStateReducer,
-  fromMap
+  fromMap,
+  scopeReducers
 } from "./lib/composition";
 
 export { createFactory, createAsyncFactory } from "./lib/actions";
