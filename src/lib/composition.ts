@@ -1,3 +1,6 @@
+import { StringMap } from "./types";
+import { State } from "fp-ts/lib/State";
+import { type } from "os";
 import { Action as ReduxAction } from "redux";
 
 export interface Action<P = {}, T = string> extends ReduxAction {
@@ -13,9 +16,9 @@ export type Reducer<State, IAction extends Action = Action> = (
  * Create one reducer that is a composition of many. Behaves like a waterfall starting from the first argument
  * @param reducers 
  */
-export function composeReducer<State>(
-  ...reducers: Array<Reducer<State>>
-): Reducer<State> {
+export function composeReducer<State, A extends Action = Action>(
+  ...reducers: Reducer<State>[]
+): Reducer<State, A> {
   return (state: State, action: Action) =>
     reducers.reduce((_state, reducer) => reducer(_state, action), state);
 }
@@ -36,3 +39,17 @@ export const fromMap = <State>(map: IActionMap<State>) =>
     map[action.type] ? map[action.type](state, action) : state) as Reducer<
     State
   >;
+
+export const scopeReducers = <S, A extends Action = Action>(
+  reducerMap: { [K in keyof S]?: Reducer<S[K]> }
+) =>
+  composeReducer<S>(
+    ...Object.entries(
+      reducerMap
+    ).map(([key, value]: [string, Reducer<S>]) => (_state: S, _action: A) => {
+      const next = value(_state[key], _action);
+      return next === _state[key]
+        ? _state
+        : Object.assign({}, _state, { [key]: next });
+    })
+  ) as Reducer<S>;

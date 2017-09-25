@@ -1,3 +1,5 @@
+import { createAsyncFactory } from "./actions";
+
 export interface ITestState {
   test: string;
   hey: string;

@@ -8,7 +8,7 @@ import {
   initialStateReducer,
   Reducer
 } from "./composition";
-import { initialTestState, ITestState } from "./TestModels";
+import { initialTestState, ITestState } from "./testData";
 
 describe("Redux composition helpers", () => {
   it("Should be able to compose reducers", () => {

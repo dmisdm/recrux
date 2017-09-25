@@ -4,4 +4,4 @@ export {
   fromMap
 } from "./lib/composition";
 
-export { createFactory } from "./lib/actions";
+export { createFactory, createAsyncFactory } from "./lib/actions";

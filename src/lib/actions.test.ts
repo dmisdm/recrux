@@ -1,15 +1,34 @@
 import { createStore } from "redux";
 
 import { createAsyncFactory, createFactory } from "./actions";
-import { Action, composeReducer } from "./composition";
-import { initialTestState, ITestState } from "./TestModels";
+import { Action, composeReducer, scopeReducers } from "./composition";
+import { initialTestState, ITestState } from "./testData";
+
+export const defaultAsync = createAsyncFactory({
+  namespace: "actionDefaults",
+  actionName: "ASYNC_STATE",
+  requestReducer: (state, { payload }) => ({
+    ...state,
+    loading: true
+  }),
+  fulfillReducer: (state, { payload }) => ({
+    ...state,
+    data: payload,
+    loading: false
+  }),
+  errorReducer: (state, { payload }) => ({
+    ...state,
+    error: payload,
+    loading: false
+  })
+});
 
 describe("Action creators", () => {
   it("createFactory works", () => {
     const reduce = (state: ITestState) => ({ ...state, hey: "whatsup brah" });
 
     const testAction = createFactory<ITestState>({
-      name: "testAction",
+      actionName: "testAction",
       namespace: "testNS",
       reducer: reduce
     });
@@ -27,7 +46,7 @@ describe("Action creators", () => {
     store.dispatch(action);
 
     expect(testAction.type).toBe(`testNS/testAction`);
-    expect(testAction.name).toBe("testAction");
+    expect(testAction.actionName).toBe("testAction");
     expect(testAction.namespace).toBe("testNS");
     expect(testAction.reducer(initialTestState, testAction())).toMatchObject(
       reduce(initialTestState)
@@ -54,7 +73,7 @@ describe("Action creators", () => {
     const actionName = "testAction";
     const namespace = "ns";
     const testAction = createAsyncFactory({
-      name,
+      actionName,
       errorReducer,
       fulfillReducer,
       namespace,
@@ -70,7 +89,7 @@ describe("Action creators", () => {
     expect(error).toHaveProperty("type");
 
     expect(testAction.type).toBe(`${namespace}/${actionName}`);
-    expect(testAction.name).toBe(actionName);
+    expect(testAction.actionName).toBe(actionName);
     expect(testAction.namespace).toBe(namespace);
     expect(testAction.reducer(initialTestState, request)).toMatchObject(
       testAction.requestReducer(initialTestState, request)
@@ -102,7 +121,7 @@ describe("Action creators", () => {
       data: undefined
     });
   });
-  /*   it("should be able to compose actions", () => {
+  it("should be able to merge async actions", () => {
     const authenticate = createAsyncFactory({
       errorReducer: (state, { payload }) => ({
         ...state,
@@ -114,9 +133,192 @@ describe("Action creators", () => {
         loading: false,
         data: payload
       }),
-      name: "authenticate",
+      actionName: "authenticate",
       namespace: "user",
-      requestReducer: (state, { payload }) => ({ ...state, loading: true })
+      requestReducer: (state, { payload }: Action<{ test: string }>) => ({
+        ...state,
+        loading: true
+      })
     });
-  }); */
+
+    const test = authenticate.merge({
+      actionName: "test",
+      requestReducer: (state, { payload }) => ({
+        ...state,
+        test: payload ? payload.test : null
+      })
+    });
+
+    expect(
+      test.reducer(initialTestState, test({ test: "Hey" }))
+    ).toMatchObject({ loading: true, test: "Hey" });
+  });
+
+  it("should be able to merge sync actions", () => {
+    const namespace = "ns";
+    const defaultState = {
+      open: false,
+      test: false
+    };
+
+    const toggleOpen = createFactory({
+      namespace,
+      actionName: "toggleOpen",
+      reducer: (state: { open: boolean; test: boolean }) => ({
+        ...state,
+        open: !state.open
+      })
+    });
+
+    const toggleOpen2 = toggleOpen.merge({
+      actionName: "toggleOpen2"
+    });
+
+    const toggleOpenAndTest = toggleOpen.merge({
+      actionName: "toggleOpenAndTest",
+      reducer: state => ({ ...state, test: !state.test })
+    });
+
+    expect(toggleOpen2.reducer(defaultState, toggleOpen2())).toMatchObject({
+      open: true
+    });
+
+    expect(
+      toggleOpenAndTest.reducer(defaultState, toggleOpenAndTest())
+    ).toMatchObject({
+      test: true,
+      open: true
+    });
+  });
+
+  it("should be able to assign actions", () => {
+    const namespace = "ns";
+    const defaultState = {
+      open: false,
+      test: false
+    };
+    type State = typeof defaultState;
+    const toggleOpen = createFactory<State>({
+      namespace,
+      actionName: "toggleOpen",
+      reducer: state => ({
+        ...state,
+        open: !state.open
+      })
+    });
+
+    const toggleTest = toggleOpen.assign({
+      actionName: "toggleTest",
+      reducer: state => ({
+        ...state,
+        test: !state.test
+      })
+    });
+
+    expect(toggleOpen.reducer(defaultState, toggleOpen())).toMatchObject({
+      test: false,
+      open: true
+    });
+
+    expect(toggleTest.reducer(defaultState, toggleTest())).toMatchObject({
+      test: true,
+      open: false
+    });
+  });
+
+  it("should be able to scope reducers", () => {
+    const namespace = "myComponent";
+    const defaultState = {
+      message: "Welcome",
+      right: {
+        open: false
+      },
+      left: {
+        open: false
+      },
+      table: {
+        data: [],
+        loading: false,
+        error: null
+      }
+    };
+
+    type OpenState = { open: boolean };
+
+    const toggleOpenRight = createFactory<OpenState>({
+      namespace,
+      actionName: "toggleOpenRight",
+      reducer: state => ({
+        ...state,
+        open: true
+      })
+    });
+
+    const toggleOpenLeft = toggleOpenRight.merge({
+      actionName: "toggleOpenLeft"
+    });
+
+    const getTableData = defaultAsync.merge({
+      namespace,
+      actionName: "getTableData"
+    });
+
+    expect(
+      scopeReducers({
+        table: getTableData.reducer
+      })(defaultState, getTableData())
+    ).toMatchObject({
+      table: {
+        loading: true
+      }
+    });
+
+    expect(
+      scopeReducers({
+        table: getTableData.reducer
+      })(defaultState, getTableData.fulfill(["test"]))
+    ).toMatchObject({
+      table: {
+        loading: false,
+        data: ["test"]
+      }
+    });
+
+    expect(
+      scopeReducers({
+        table: getTableData.reducer
+      })(defaultState, getTableData.error("this is an error message"))
+    ).toMatchObject({
+      table: {
+        loading: false,
+        error: "this is an error message"
+      }
+    });
+
+    const reducer = composeReducer(
+      (state = defaultState) => state,
+      scopeReducers({
+        right: toggleOpenRight.reducer
+      })
+    );
+
+    expect(reducer(defaultState, toggleOpenRight())).toMatchObject({
+      right: {
+        open: true
+      }
+    });
+
+    // Make sure if no action was caught, the same state is returned
+    expect(reducer(defaultState, toggleOpenLeft())).toBe(defaultState);
+
+    expect(
+      scopeReducers({
+        left: toggleOpenLeft.reducer
+      })(defaultState, toggleOpenLeft())
+    ).toMatchObject({
+      left: {
+        open: true
+      }
+    });
+  });
 });

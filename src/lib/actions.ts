@@ -1,18 +1,44 @@
 import { Action, composeReducer, Reducer } from "./composition";
+import { Optional } from "./types";
+import { identity } from "./utils";
 
 /* const actionRegistry = {};
 const doesActionExist = (actionName: string) => !!actionRegistry[actionName];
 const registerAction = (actionName: string) =>
   (actionRegistry[actionName] = true); */
 
-export interface IExtra<State, PayloadType> {
-  reducer: (state: State, action: Action<PayloadType>) => State;
-  name: string;
+export type Creator<R> = (payload?: R) => Action<R>;
+
+export interface SyncFactoryParams<S, P> {
   namespace: string;
-  type: string;
+  actionName: string;
+  reducer: (state: S, action: Action<P>) => S;
 }
 
-export interface IExtraAsync<S, R, F, E> {
+export interface AsyncFactoryParam<S, R, F, E> {
+  namespace: string;
+  actionName: string;
+  requestReducer: Reducer<S, Action<R>>;
+  fulfillReducer: Reducer<S, Action<F>>;
+  errorReducer: Reducer<S, Action<E>>;
+}
+
+export interface SyncFactory<S, P> {
+  reducer: (state: S, action: Action<P>) => S;
+  actionName: string;
+  namespace: string;
+  type: string;
+  merge: (
+    param: Optional<SyncFactoryParams<S, P>> & { actionName: string }
+  ) => SyncFactoryOut<S, P>;
+  assign: (
+    param: Optional<SyncFactoryParams<S, P>> & { actionName: string }
+  ) => SyncFactoryOut<S, P>;
+}
+
+export type SyncFactoryOut<S, P> = SyncFactory<S, P> & Creator<P>;
+
+export interface AsyncFactory<S, R, F, E> {
   reducer: Reducer<S, Action<R | F | E>>;
   request: (payload?: R) => Action<R>;
   requestReducer: Reducer<S, Action<R>>;
@@ -21,83 +47,104 @@ export interface IExtraAsync<S, R, F, E> {
   fulfill: (payload?: F) => Action<F>;
   errorReducer: Reducer<S, Action<E>>;
   error: (payload?: E) => Action<E>;
-  name: string;
+  actionName: string;
   namespace: string;
   type: string;
   fulfillType: string;
   errorType: string;
+  merge: (
+    paramOpt: Optional<AsyncFactoryParam<S, R, F, E>> & { actionName: string }
+  ) => AsyncFactoryOut<S, R, F, E>;
+  assign: (
+    paramOpt: Optional<AsyncFactoryParam<S, R, F, E>> & { actionName: string }
+  ) => AsyncFactoryOut<S, R, F, E>;
 }
+
+export type AsyncFactoryOut<S, R, F, E> = AsyncFactory<S, R, F, E> & Creator<R>;
 
 const assign = Object.assign;
 
 export const createFactory = <State, PayloadType = {}>({
   namespace,
-  name,
+  actionName,
   reducer
 }: {
   namespace: string;
-  name: string;
+  actionName: string;
   reducer: (state: State, action: Action<PayloadType>) => State;
 }) => {
-  const actionType = `${namespace}/${name}`;
-
-  type IOutput = ((payload?: PayloadType) => Action<PayloadType>) &
-    IExtra<State, PayloadType>;
+  const actionType = `${namespace}/${actionName}`;
 
   const creator: ((
     payload?: PayloadType
   ) => Action<PayloadType>) = payload => ({
     payload,
-    type: `${namespace}/${name}`
+    type: `${namespace}/${actionName}`
   });
 
-  const extra: IExtra<State, PayloadType> = {
-    name,
+  Object.defineProperty(creator, "name", {
+    value: actionType,
+    writable: false
+  });
+
+  const _reducer: typeof reducer = (state, action) => {
+    if (action.type === actionType) {
+      return reducer(state, action);
+    } else {
+      return state;
+    }
+  };
+
+  const extra: SyncFactory<State, PayloadType> = {
+    actionName,
+    merge: param =>
+      createFactory({
+        namespace,
+        ...param,
+        reducer: composeReducer(
+          reducer,
+          param.reducer ? param.reducer : identity
+        )
+      }),
+    assign: param =>
+      createFactory({
+        ...{ namespace, reducer },
+        ...param
+      }),
     namespace,
-    reducer: (state, action) => {
-      if (action.type === actionType) {
-        return reducer(state, action);
-      } else {
-        return state;
-      }
-    },
+    reducer: _reducer,
     type: actionType
   };
 
-  const output: IOutput = assign(creator, extra);
+  const output: SyncFactoryOut<State, PayloadType> = assign(creator, extra);
 
   return output;
 };
 
 export const createAsyncFactory = <S, R, F, E>({
   namespace,
-  name,
+  actionName,
   requestReducer,
   fulfillReducer,
   errorReducer
-}: {
-  namespace: string;
-  name: string;
-  requestReducer: Reducer<S, Action<R>>;
-  fulfillReducer: Reducer<S, Action<F>>;
-  errorReducer: Reducer<S, Action<E>>;
-}) => {
-  const actionType = `${namespace}/${name}`;
+}: AsyncFactoryParam<S, R, F, E>) => {
+  const actionType = `${namespace}/${actionName}`;
   const actionTypes = {
     error: `${actionType}_ERROR`,
     fulfill: `${actionType}_FULFILL`,
     request: actionType
   };
 
-  type Extra = IExtraAsync<S, R, F, E>;
-  type IOutput = ((payload?: R) => Action<R, typeof actionTypes.request>) &
-    Extra;
-
   const requestCreator: ((
     payload?: R
   ) => Action<R, typeof actionTypes.request>) = payload => ({
     payload,
     type: actionTypes.request
+  });
+
+  Object.defineProperty(requestCreator, "name", {
+    value: actionTypes.request,
+    writable: false
   });
 
   const fulfillCreator: ((
@@ -107,11 +154,21 @@ export const createAsyncFactory = <S, R, F, E>({
     type: actionTypes.fulfill
   });
 
+  Object.defineProperty(fulfillCreator, "name", {
+    value: actionTypes.fulfill,
+    writable: false
+  });
+
   const errorCreator: ((
     payload?: E
   ) => Action<E, typeof actionTypes.error>) = payload => ({
     payload,
     type: actionTypes.error
+  });
+
+  Object.defineProperty(errorCreator, "name", {
+    value: actionTypes.error,
+    writable: false
   });
 
   const _errorReducer: typeof errorReducer = (state, action) => {
@@ -136,11 +193,33 @@ export const createAsyncFactory = <S, R, F, E>({
     }
   };
 
-  const extra: Extra = {
-    name,
+  const extra: AsyncFactory<S, R, F, E> = {
+    actionName,
     error: errorCreator,
     errorReducer: _errorReducer,
     errorType: actionTypes.error,
+    merge: param =>
+      createAsyncFactory({
+        namespace,
+        ...param,
+        requestReducer: composeReducer(
+          param.requestReducer ? param.requestReducer : identity,
+          requestReducer
+        ),
+        errorReducer: composeReducer(
+          param.errorReducer ? param.errorReducer : identity,
+          errorReducer
+        ),
+        fulfillReducer: composeReducer(
+          param.fulfillReducer ? param.fulfillReducer : identity,
+          fulfillReducer
+        )
+      }),
+    assign: param =>
+      createAsyncFactory({
+        ...{ namespace, requestReducer, errorReducer, fulfillReducer },
+        ...param
+      }),
     fulfill: fulfillCreator,
     fulfillReducer: _fulfillReducer,
     fulfillType: actionTypes.fulfill,
@@ -152,7 +231,6 @@ export const createAsyncFactory = <S, R, F, E>({
     type: actionType
   };
 
-  const output: IOutput = assign(requestCreator, extra);
-
+  const output: AsyncFactoryOut<S, R, F, E> = assign(requestCreator, extra);
   return output;
 };
