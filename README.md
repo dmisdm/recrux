@@ -136,22 +136,9 @@ const defaultState = {
     error: null,
     loading: false
 }
-const getData = defaultAsync.extend({
+const getData = defaultAsync.assign({
     namespace,
     actionName: "GET_DATA"
-})
-
-const getDataCustom = createAsyncAction({
-    namespace,
-    actionName: "GET_DATA_CUSTOM",
-    requestReducer: composeReducer(
-        getData.requestReducer
-    ),
-    fulfillReducer: getData.fulfillReducer,
-    errorReducer: (state, {payload}) => ({
-        ...state,
-        dataError: payload
-    })
 })
 
 export default composeReducer(
@@ -161,30 +148,82 @@ export default composeReducer(
 ```
 
 
-#### More action factories (and with typescript)
+#### Scoping actions
 ```typescript
 
-// Explicit typing of state (or part of the state) is needed when defining an action on its own and you need to use properties within it.
-// For example (toggling open state)
+// Merge and assign actions (like with objects)
+import { createFactory, composeReducer, scopeReducers } from 'recrux'
 
+const namespace = "myComponent"
 const defaultState = {
     right: {
         open: false
     },
     left: {
         open: false
+    },
+    table: {
+        data: [],
+        error: null,
+        loading: false
     }
 }
 
-type OpenState = typeof defaultState.right
+type OpenState = {open: boolean}
 
-const toggleOpen = createFactory<OpenState>({
-    namespace: "myComponent",
-    actionName: "sidebarRight",
+const toggleOpenRight = createFactory<OpenState>({
+    namespace,
+    actionName: "toggleOpenRight",
     reducer: (state) => ({
         ...state,
         open: !state.open
     })
 });
+
+
+const toggleOpenLeft = toggleOpenLeft.assign({
+    actionName: "toggleOpenLeft"
+})
+
+const getTableData = defaultAsync.assign({
+    namespace,
+    actionName: "getTableData"
+})
+
+
+// assign will behave like object assign. It wont call parent action reducers if you override it.
+// The only thing it will keep in the below example is namespace
+const removeTableError = toggleOpenRight.assign({
+    actionName: "removeTableError",
+    reducer: (state) => ({
+        ...state,
+        error: null
+    })
+})
+
+
+// Merge will also call the reducer from the parent action, even if you pass it as a param
+const getTableDataWithAlert = getTableData.merge({
+    actionName: "getTableDataWithAlert",
+    errorReducer: (state, {payload}) => ({
+        ...state,
+        alert: payload
+    })
+})
+
+export default composeReducer(
+    (state = defaultState) => state,
+    scopeReducers({
+        right: toggleOpenRight.reducer,
+        left: toggleOpenLeft.reducer,
+        table: composeReducer(
+            getTableData.reducer,
+            getTableDataWithAlert.reducer,
+            removeTableError.reducer
+        )
+    })
+)
+
+
 
 ```
