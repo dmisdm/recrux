@@ -19,3 +19,5 @@ export default composeReducer(
 
 ```
 the name of the action `getTableDataWithAlert` has an implicit relationship with the `table` part of the state, as its not going get called for any other reason, although, not containing scope within actions is also a nice decoupling.
+
+#### Write more examples especially for actual usage/creating actions
