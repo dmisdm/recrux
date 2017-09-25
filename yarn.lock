@@ -1739,10 +1739,6 @@ forwarded@~0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/forwarded/-/forwarded-0.1.0.tgz#19ef9874c4ae1c297bcf078fde63a09b66a84363"
 
-fp-ts@^0.3.5:
-  version "0.3.5"
-  resolved "https://registry.yarnpkg.com/fp-ts/-/fp-ts-0.3.5.tgz#eb00258e0c2643ae370a4588b12e7b71dee985bc"
-
 fresh@0.5.0:
   version "0.5.0"
   resolved "https://registry.yarnpkg.com/fresh/-/fresh-0.5.0.tgz#f474ca5e6a9246d6fd8e0953cfa9b9c805afa78e"
@@ -4062,10 +4058,6 @@ querystringify@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/querystringify/-/querystringify-1.0.0.tgz#6286242112c5b712fa654e526652bf6a13ff05cb"
 
-ramda@^0.24.1:
-  version "0.24.1"
-  resolved "https://registry.yarnpkg.com/ramda/-/ramda-0.24.1.tgz#c3b7755197f35b8dc3502228262c4c91ddb6b857"
-
 randomatic@^1.1.3:
   version "1.1.7"
   resolved "https://registry.yarnpkg.com/randomatic/-/randomatic-1.1.7.tgz#c7abe9cc8b87c0baa876b19fde83fd464797e38c"
@@ -5124,9 +5116,9 @@ type-is@~1.6.15:
     media-typer "0.3.0"
     mime-types "~2.1.15"
 
-typescript@^2.4.1:
-  version "2.4.1"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-2.4.1.tgz#c3ccb16ddaa0b2314de031e7e6fee89e5ba346bc"
+typescript@^2.5.2:
+  version "2.5.2"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-2.5.2.tgz#038a95f7d9bbb420b1bf35ba31d4c5c1dd3ffe34"
 
 typescript@~2.3.3:
   version "2.3.4"
