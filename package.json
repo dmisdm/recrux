@@ -9,8 +9,9 @@
     "@types/ramda": "^0.24.9",
     "husky": "^0.14.2",
     "lint-staged": "^4.0.0",
-    "react-scripts-ts": "^2.3.2",
+    "react-scripts-ts": "^2.7.0",
     "redux": "^3.7.1",
+    "ts-jest": "^21.0.1",
     "tslint": "^5.4.3",
     "tslint-config-prettier": "^1.1.0",
     "tslint-language-service": "^0.9.6",
@@ -29,15 +30,13 @@
     "composition",
     "fp"
   ],
-  "files": [
-    "build/dist"
-  ],
+  "files": ["build/dist"],
   "scripts": {
     "build": "tslint -p . && tsc",
     "test": "react-scripts-ts test --env=jsdom",
     "clean": "rm -rf build",
     "precommit": "lint-staged",
-    "prepublish": "npm run test && lint-staged && npm run build"
+    "prepublishOnly": "CI=true npm run test && npm run build"
   },
   "main": "build/dist/index.js",
   "typings": "./build/dist/index.d.ts",
@@ -52,9 +51,6 @@
   "license": "MIT",
   "npmName": "recrux",
   "lint-staged": {
-    "*.{ts,tsx}": [
-      "prettier --write",
-      "git add"
-    ]
+    "*.{ts,tsx}": ["prettier --write", "git add"]
   }
 }
