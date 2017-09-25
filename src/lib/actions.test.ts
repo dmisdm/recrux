@@ -1,6 +1,6 @@
 import { createStore } from "redux";
 
-import { createAsyncFactory, createFactory } from "./actions";
+import { createAsyncFactory, createFactory, AsyncFactory } from "./actions";
 import { Action, composeReducer, scopeReducers } from "./composition";
 import { initialTestState, ITestState } from "./testData";
 

@@ -29,14 +29,13 @@
     "composition",
     "fp"
   ],
-  "files": [
-    "build/dist"
-  ],
+  "files": ["build/dist"],
   "scripts": {
     "build": "tslint -p . && tsc",
     "test": "react-scripts-ts test --env=jsdom",
     "clean": "rm -rf build",
-    "precommit": "lint-staged"
+    "precommit": "lint-staged",
+    "prepublish": "npm run test && lint-staged && npm run build"
   },
   "main": "build/dist/index.js",
   "typings": "./build/dist/index.d.ts",
@@ -51,9 +50,6 @@
   "license": "MIT",
   "npmName": "recrux",
   "lint-staged": {
-    "*.{ts,tsx}": [
-      "prettier --write",
-      "git add"
-    ]
+    "*.{ts,tsx}": ["prettier --write", "git add"]
   }
 }

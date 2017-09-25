@@ -1,6 +1,3 @@
-import { StringMap } from "./types";
-import { State } from "fp-ts/lib/State";
-import { type } from "os";
 import { Action as ReduxAction } from "redux";
 
 export interface Action<P = {}, T = string> extends ReduxAction {
