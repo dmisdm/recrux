@@ -1,4 +1,4 @@
-# Recrux
+# (WIP) Recrux
 A functional, action centered, typescript flavored, and slightly opinionated toolbelt for redux.
 Core values:
 
