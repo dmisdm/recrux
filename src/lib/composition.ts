@@ -9,10 +9,7 @@ export type Reducer<State, IAction extends Action = Action> = (
   state: State,
   action: IAction
 ) => State;
-/**
- * Create one reducer that is a composition of many. Behaves like a waterfall starting from the first argument
- * @param reducers 
- */
+
 export function composeReducer<State, A extends Action = Action>(
   ...reducers: Reducer<State>[]
 ): Reducer<State, A> {
@@ -29,7 +26,7 @@ export interface IActionMap<State> {
 }
 /**
  * Make a reducer out of a map: {[actionType string]: Reducer }
- * @param map 
+ * @param map
  */
 export const fromMap = <State>(map: IActionMap<State>) =>
   ((state, action) =>
@@ -41,12 +38,12 @@ export const scopeReducers = <S, A extends Action = Action>(
   reducerMap: { [K in keyof S]?: Reducer<S[K]> }
 ) =>
   composeReducer<S>(
-    ...Object.entries(
-      reducerMap
-    ).map(([key, value]: [string, Reducer<S>]) => (_state: S, _action: A) => {
-      const next = value(_state[key], _action);
-      return next === _state[key]
-        ? _state
-        : Object.assign({}, _state, { [key]: next });
-    })
+    ...Object.entries(reducerMap).map(
+      ([key, value]: [string, Reducer<S>]) => (_state: S, _action: A) => {
+        const next = value(_state[key], _action);
+        return next === _state[key]
+          ? _state
+          : Object.assign({}, _state, { [key]: next });
+      }
+    )
   ) as Reducer<S>;
