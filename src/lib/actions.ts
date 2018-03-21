@@ -82,11 +82,6 @@ export const createFactory = <State, PayloadType = {}>({
     type: `${namespace}/${actionName}`
   });
 
-  Object.defineProperty(creator, "name", {
-    value: actionType,
-    writable: false
-  });
-
   const _reducer: typeof reducer = (state, action) => {
     if (action.type === actionType) {
       return reducer(state, action);
@@ -142,11 +137,6 @@ export const createAsyncFactory = <S, R, F, E>({
     type: actionTypes.request
   });
 
-  Object.defineProperty(requestCreator, "name", {
-    value: actionTypes.request,
-    writable: false
-  });
-
   const fulfillCreator: ((
     payload?: F
   ) => Action<F, typeof actionTypes.fulfill>) = payload => ({
@@ -154,21 +144,11 @@ export const createAsyncFactory = <S, R, F, E>({
     type: actionTypes.fulfill
   });
 
-  Object.defineProperty(fulfillCreator, "name", {
-    value: actionTypes.fulfill,
-    writable: false
-  });
-
   const errorCreator: ((
     payload?: E
   ) => Action<E, typeof actionTypes.error>) = payload => ({
     payload,
     type: actionTypes.error
-  });
-
-  Object.defineProperty(errorCreator, "name", {
-    value: actionTypes.error,
-    writable: false
   });
 
   const _errorReducer: typeof errorReducer = (state, action) => {
