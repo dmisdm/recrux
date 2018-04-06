@@ -18,9 +18,9 @@ export interface SyncFactoryParams<S, P> {
 export interface AsyncFactoryParam<S, R, F, E> {
   namespace: string;
   actionName: string;
-  requestReducer: Reducer<S, Action<R>>;
-  fulfillReducer: Reducer<S, Action<F>>;
-  errorReducer: Reducer<S, Action<E>>;
+  requestReducer: Reducer<S, Action<R>> | undefined;
+  fulfillReducer: Reducer<S, Action<F>> | undefined;
+  errorReducer: Reducer<S, Action<E>> | undefined;
 }
 
 export interface SyncFactory<S, P> {
@@ -119,9 +119,9 @@ export const createFactory = <State, PayloadType = {}>({
 export const createAsyncFactory = <S, R, F, E>({
   namespace,
   actionName,
-  requestReducer,
-  fulfillReducer,
-  errorReducer
+  requestReducer = identity,
+  fulfillReducer = identity,
+  errorReducer = identity
 }: AsyncFactoryParam<S, R, F, E>) => {
   const actionType = `${namespace}/${actionName}`;
   const actionTypes = {
